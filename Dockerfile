@@ -1,6 +1,6 @@
 FROM hearstat/alpine-java:jdk8
 
-MAINTAINER Hearst Automation Team "atat@hearst.com"
+MAINTAINER Khurram Shahzad "shehzadgee@gmail.com"
 
 # Environment Variables
 ENV JENKINS_VERSION 1.625.2
@@ -13,13 +13,28 @@ ENV COPY_REFERENCE_FILE_LOG $JENKINS_HOME/copy_reference_file.log
 RUN apk update
 RUN apk add \
     gnupg \
+    bash \
     tar \
     ruby \
     git \
     zip \
     curl \
     wget \
+	py-pip \
+	python-dev \
+	pytest --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/testing/ --allow-untrusted \
+	firefox --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/communit/ --allow-untrusted \
+	sshpass \
+	qemu-img \
+	screen \
     && rm -rf /var/cache/apk/*
+	
+RUN pip install robotframework \
+    &&pip install pytest \
+    &&pip install redis \
+    &&pip install flask \
+    &&pip install flask_restful \
+    &&pip install pytest-html
 
 # Add jenkins user
 RUN addgroup jenkins && \
@@ -27,7 +42,7 @@ RUN addgroup jenkins && \
 
 # Setup directories and rights so Jenkins user can do things without sudo
 COPY systemconfig.sh /tmp/systemconfig.sh
-RUN bash -c /tmp/systemconfig.sh
+RUN /bin/bash -c /tmp/systemconfig.sh
 
 # Pull LTS version of Jenkins listed above
 RUN curl -fL http://mirrors.jenkins-ci.org/war-stable/$JENKINS_VERSION/jenkins.war -o $JENKINS_SHARE/jenkins.war
